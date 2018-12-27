@@ -20,11 +20,30 @@ class Connect{
             admin_menu();
         });
     }
+
+    //login
+    async login(user,pass){
+        let passlog = false;
+        let self = this;
+        this.connection.query(`SELECT * FROM login WHERE user= 'admin' AND pass = 'pass'`,await function(err,res){
+            if(err){
+                throw err;
+            }
+            if(user === res[0].user && pass === res[0].pass){
+                passlog = true;
+            }else{
+                console.log("\nyou are not authorized");
+                self.close();
+                process.exit(0);
+            }
+        });
+        return passlog;
+    }
     //save product
     saveNewProduct(product){
-        let price = parseFloat(product[2]);
-        let quantity = parseInt(product[3]);
-        this.connection.query(`INSERT INTO products(product_name,department_name,price,stock_quantity) VALUES ('${product[0]}','${product[1]}',${price},${quantity})`,function(err){
+        let price = parseFloat(product[3]);
+        let quantity = parseInt(product[4]);
+        this.connection.query(`INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUES ('${product[0]}','${product[1]}','${product[2]}',${price},${quantity})`,function(err){
             if(err){
                 throw err;
             }
@@ -96,6 +115,7 @@ class Connect{
             res.forEach(el=>{
                 products.push({department:el.department_name,quantity:el.stock_quantity});
             });
+            console.log('\n');
             console.table(products);
 
         });

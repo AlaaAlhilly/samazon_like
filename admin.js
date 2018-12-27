@@ -5,8 +5,38 @@ let Con = require('./dbconnect');
 let productEntries = [];
 //connect to the database
 let connection = new Con();
-connection.con(admin_panel);
+connection.con(login);
+let counter = 0;
+let msg = ["Product name?","in which department?","Price?","Quantity?"]
 //show the admin panel
+function login(){
+    inquirer.prompt([
+        {
+            message:"username",
+            name : "username"
+        }
+    ]).then(function(res){
+        if(res.username){
+            user = res.username;
+            inquirer.prompt([
+                {
+                    type: "password",
+                    message: "password:",
+                    name: "pass"
+                }
+            ]).then(function(resp){
+                if(resp.pass){
+                    if(connection.login(user,resp.pass)){
+                        admin_panel();
+                    }else{
+                        connection.close();
+                        process.exit(0);
+                    }
+                }
+            })
+        }
+    })
+}
 function admin_panel(){
     //display list of operations for the store admin
     inquirer.prompt([
@@ -19,7 +49,7 @@ function admin_panel(){
     ]).then(function(response){
         switch (response.menu) {
             case "Add new product":
-                addNewProduct(["Product name?","Department?","Price?","Quantity?"],0);
+                addNewProduct(msg,counter);
                 break;
             case "update product price":
                 updateProductPrice();
@@ -39,6 +69,7 @@ function admin_panel(){
         }
     })
 }
+let done = true;
 //add new product
 function addNewProduct(msg,counter){
     inquirer.prompt([
@@ -52,7 +83,13 @@ function addNewProduct(msg,counter){
         }
         if(counter < msg.length-1){
             counter++;
-            addNewProduct(msg,counter);
+            if(counter == 1){
+                done = false;
+                getDepartment(msg);
+                counter++;
+                
+            }
+           if(done){ addNewProduct(msg,counter);}
         }else{
             if(connection.saveNewProduct(productEntries)){
                 console.log(productEntries[0] + " saved successfully");
@@ -61,6 +98,54 @@ function addNewProduct(msg,counter){
                 console.log("something went wrong");
                 admin_panel();
             }
+        }
+    })
+}
+//select the department
+function getDepartment(msg){
+    inquirer.prompt([
+        {
+            type: "list",
+            message:msg[counter],
+            choices:["GAMING","CLOTHING","ELECTRONICS","LAPTOP","DESKTOP","MOBILE"],
+            name:"dep"
+        }
+    ]).then(function(resp){
+        if(resp.dep){
+            switch (resp.dep) {
+                case "GAMING":
+                    productEntries.push(1);
+                    productEntries.push("GAMING");
+                    done = true;
+                    break;
+                case "CLOTHING":
+                    productEntries.push(2);
+                    productEntries.push("CLOTHING");
+                    done = true;
+                    break;
+                case "ELECTRONICS":
+                    productEntries.push(3);
+                    productEntries.push("ELECTRONICS");
+                    done = true;
+                    break;
+                case "LAPTOP":
+                    productEntries.push(4);
+                    productEntries.push("LAPTOP");
+                    done = true;
+                    break;
+                case "DESKTOP":
+                    productEntries.push(5);
+                    productEntries.push("DESKTOP");
+                    done = true;
+                    break;
+                case "MOBILE":
+                    productEntries.push(6);
+                    productEntries.push("MOBILE");
+                    done = true;
+                    break;
+            }
+            
+            addNewProduct(msg,2);
         }
     })
 }

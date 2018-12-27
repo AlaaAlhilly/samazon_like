@@ -3,7 +3,12 @@ DROP DATABASE IF EXISTS amz_product;
 CREATE DATABASE amz_product;
 
 USE amz_product;
-
+CREATE TABLE login(
+    id INT NOT NULL AUTO_INCREMENT,
+    user VARCHAR(50) NOT NULL,
+    pass VARCHAR(50) NOT NULL,
+    PRIMARY KEY (id)
+);
 CREATE TABLE products(
     item_id INT NOT NULL AUTO_INCREMENT,
     product_name VARCHAR(100) NOT NULL,
@@ -27,6 +32,7 @@ CREATE TABLE track(
     stock_quantity INT NOT NULL,
     PRIMARY KEY (item_id)
 );
+INSERT INTO login(user,pass) VALUE('admin','pass');
 INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUE('PS4',1,'GAMING',299.99,1000);
 INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUE('XBOX',1,'GAMING',299.99,200);
 INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUE('SONY TV',2,'ELECTRONICS',599.99,900);
