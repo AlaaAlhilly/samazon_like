@@ -86,10 +86,9 @@ function addNewProduct(msg,counter){
             if(counter == 1){
                 done = false;
                 getDepartment(msg);
-                counter++;
-                
+                counter++;   
             }
-           if(done){ addNewProduct(msg,counter);}
+            if(done){ addNewProduct(msg,counter);}
         }else{
             if(connection.saveNewProduct(productEntries)){
                 console.log(productEntries[0] + " saved successfully");
@@ -168,7 +167,7 @@ function addToExistProduct(){
             ]).then(function(answer){
                 if(answer.addstore){
                     if(connection.UpdateProductStore(answer.addstore,product_name)){
-                        console.log(prod_name + " stock quantity updated successfully");
+                        console.log(product_name + " stock quantity updated successfully");
                         inquirer.prompt([
                             {
                                 type: "confirm",
@@ -193,6 +192,8 @@ function addToExistProduct(){
                                         }
                                     }
                                 })
+                            }else{
+                                admin_panel();
                             }
                         })
                     }else{

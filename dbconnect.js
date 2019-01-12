@@ -43,26 +43,33 @@ class Connect{
     saveNewProduct(product){
         let price = parseFloat(product[3]);
         let quantity = parseInt(product[4]);
+        let total_cost = price * quantity;
+        let outsider = this;
         this.connection.query(`INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUES ('${product[0]}','${product[1]}','${product[2]}',${price},${quantity})`,function(err){
             if(err){
                 throw err;
             }
+            outsider.updateTrackStock(product[1],quantity,0,total_cost);
         });
         return true;
     }
-    //update quantity of product
+    //add quantity of product
     UpdateProductStore(quantity,product_name){
         let storeQuantity = parseInt(quantity);
         let secConnection = this.connection;
+        let outsider = this;
         this.connection.query(`SELECT * FROM products WHERE product_name = '${product_name}'`,function(err,res){
             if(err){
                 throw err;
             }
+            let dep_id = res[0].dep_id;
             storeQuantity += res[0].stock_quantity;
             secConnection.query(`UPDATE products SET stock_quantity = ${storeQuantity} WHERE product_name = '${product_name}'`,function(err){
                 if(err){
                     throw err;
                 } 
+                let cost = parseInt(quantity) * res[0].price;
+                outsider.updateTrackStock(dep_id, parseInt(quantity),0,cost);
             });  
         });  
         return true; 
@@ -90,15 +97,16 @@ class Connect{
     }
     //disply the stock for all products
     checkAllProductsStock(){
-        this.connection.query(`SELECT * FROM products`,function(err,res){
+        this.connection.query(`SELECT * FROM track`,function(err,res){
             if(err){
                 throw err;
             }
             let products = [];
 
             res.forEach(el=>{
-                products.push({product:el.product_name,quantity:el.stock_quantity});
+                products.push({department:el.department_name,quantity:el.stock_quantity,sale:el.sale,cost:el.cost,profit:el.profit});
             });
+            console.log('\n');
             console.table(products);
 
         });
@@ -106,14 +114,14 @@ class Connect{
     }
     //order departments according to the sale
     topSellDep(){
-        this.connection.query(`SELECT * FROM track ORDER BY stock_quantity DESC`,function(err,res){
+        this.connection.query(`SELECT * FROM track ORDER BY sale DESC`,function(err,res){
             if(err){
                 throw err;
             }
             let products = [];
 
             res.forEach(el=>{
-                products.push({department:el.department_name,quantity:el.stock_quantity});
+                products.push({department:el.department_name,quantity:el.stock_quantity,sale:el.sale,cost:el.cost,profit:el.profit});
             });
             console.log('\n');
             console.table(products);
@@ -134,29 +142,49 @@ class Connect{
     buyProduct(product_name,quantity){
         let q = parseInt(quantity);
         let secConnection = this.connection;
+        //this line is to call the function upadatesTrackStock
+        //from inside the the sql function
         let visitor = this;
         this.connection.query(`SELECT * FROM products WHERE product_name = "${product_name}"`,function(err,res){
             if(err){
                 throw err;
             }
             let product_quantity = res[0].stock_quantity - q;
+            let sale = res[0].price * q;
             let department_id = res[0].dep_id;
-            secConnection.query(`UPDATE products SET stock_quantity = ${product_quantity} WHERE product_name = '${product_name}'`,function(err,result){
+            secConnection.query(`UPDATE products SET stock_quantity = ${product_quantity} WHERE product_name = '${product_name}'`,function(err){
                 if(err){
+                    console.log('hi');
                     throw err;
                 }
-                visitor.updateTrackStock(department_id,q);
+                 visitor.updateTrackStock(department_id,q,sale,0);
             })
         })
         return true;
     }
     //update the stock in the track table to track the sale
-    updateTrackStock(department_id,quantity){
-        this.connection.query(`UPDATE track SET stock_quantity = ${quantity} WHERE item_id = '${department_id}'`,function(err){
-            if(err){
-                throw err;
+    updateTrackStock(department_id,quantity,sale,cost){
+        console.log(department_id);
+        let seConnection = this.connection;
+        this.connection.query(`SELECT * FROM track where item_id = ${department_id}`,function(err,res){
+            if(err) throw err;
+            //add to or subtract from the product quantity in the track table
+            if(cost == 0){
+                quantity = res[0].stock_quantity - quantity;
             }
-        })
+            if(sale == 0) {
+                quantity = res[0].stock_quantity + quantity;
+            }
+            let total_cost = res[0].cost + cost;
+            let total_sale = res[0].sale + sale;
+            let profit = total_sale - total_cost;
+            seConnection.query(`UPDATE track SET stock_quantity = ${quantity}, sale=${total_sale}, cost=${total_cost}, profit= ${profit} WHERE item_id = '${department_id}'`,function(err){
+                if(err){
+                    throw console.log('failed');
+                }
+            })
+        });
+        
         return true;
     }
     //display all products to the customer

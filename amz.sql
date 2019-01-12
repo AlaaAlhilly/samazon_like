@@ -29,7 +29,10 @@ CREATE TABLE customers(
 CREATE TABLE track(
     item_id INT NOT NULL,
     department_name VARCHAR(100) NOT NULL,
-    stock_quantity INT NOT NULL,
+    stock_quantity INT(40) NOT NULL,
+    cost DECIMAL(40),
+    sale DECIMAL(40),
+    profit DECIMAL(40),
     PRIMARY KEY (item_id)
 );
 INSERT INTO login(user,pass) VALUE('admin','pass');
@@ -47,11 +50,12 @@ INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) V
 INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUE('HP NP-9',4,'LAPTOP',750.00,340);
 INSERT INTO products(product_name,dep_id,department_name,price,stock_quantity) VALUE('LENOVO YOGA',4,'LAPTOP',1200.00,500);
 
-INSERT INTO track(item_id,department_name,stock_quantity) VALUE(1,'GAMING',0);
-INSERT INTO track(item_id,department_name,stock_quantity) VALUE(2,'ELECTRONICS',0);
-INSERT INTO track(item_id,department_name,stock_quantity) VALUE(3,'CLOTHING',0);
-INSERT INTO track(item_id,department_name,stock_quantity) VALUE(4,'LAPTOP',0);
-INSERT INTO track(item_id,department_name,stock_quantity) VALUE(5,'DESKTOP',0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(1,'GAMING',1200,12000.0000,0,0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(2,'ELECTRONICS',1640,820000.0000,0,0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(3,'CLOTHING',166,4150.0000,0,0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(4,'LAPTOP',1129,1693500.0000,0,0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(5,'DESKTOP',750,712500.0000,0,0);
+INSERT INTO track(item_id,department_name,stock_quantity,cost,sale,profit) VALUE(6,'MOBILE',0,0.0000,0,0);
 
 
 SELECT * FROM products;
